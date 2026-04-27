@@ -2,17 +2,17 @@ import React from 'react';
 
 export default function ExpenseList({ expenses }) {
   if (expenses.length === 0) {
-    return <p className="state-msg">No expenses found.</p>;
+    return <p className="state-msg">no records found</p>;
   }
 
   return (
     <table className="expense-table">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Category</th>
-          <th>Description</th>
-          <th className="amount-col">Amount</th>
+          <th>date</th>
+          <th>category</th>
+          <th>description</th>
+          <th className="amount-col">amount</th>
         </tr>
       </thead>
       <tbody>

@@ -1,7 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-export async function getExpenses({ category } = {}) {
-    const params = new URLSearchParams({ sort: 'date_desc' });
+export async function getExpenses({ category, sort = 'date_desc' } = {}) {
+    const params = new URLSearchParams({ sort });
     if (category && category !== 'all') params.set('category', category);
 
     const res = await fetch(`${BASE_URL}/expenses?${params}`);

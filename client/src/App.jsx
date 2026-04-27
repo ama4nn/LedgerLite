@@ -11,14 +11,15 @@ export default function App() {
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSort, setSelectedSort] = useState('date_desc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchExpenses = useCallback(async (category = selectedCategory) => {
+  const fetchExpenses = useCallback(async (category = selectedCategory, sort = selectedSort) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getExpenses({ category });
+      const data = await getExpenses({ category, sort });
       setExpenses(data.expenses);
       setTotal(data.total);
       setCategories(data.categories);
@@ -27,18 +28,22 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, selectedSort]);
 
   useEffect(() => {
-    fetchExpenses(selectedCategory);
-  }, [selectedCategory]);
+    fetchExpenses(selectedCategory, selectedSort);
+  }, [selectedCategory, selectedSort]);
 
   const handleCategoryChange = (cat) => {
     setSelectedCategory(cat);
   };
 
+  const handleSortChange = (sort) => {
+    setSelectedSort(sort);
+  };
+
   const handleExpenseCreated = () => {
-    fetchExpenses(selectedCategory);
+    fetchExpenses(selectedCategory, selectedSort);
   };
 
   return (
@@ -62,6 +67,8 @@ export default function App() {
               categories={categories}
               selected={selectedCategory}
               onChange={handleCategoryChange}
+              sortSelected={selectedSort}
+              onSortChange={handleSortChange}
             />
           </div>
 

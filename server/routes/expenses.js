@@ -77,8 +77,13 @@ router.get('/', (req, res) => {
         params.push(category);
     }
 
-    // Default sort is date desc; fallback to created_at for same-date ordering
-    query += ' ORDER BY date DESC, created_at DESC';
+    // Sort logic
+    if (sort === 'date_asc') {
+        query += ' ORDER BY date ASC, created_at ASC';
+    } else {
+        // Default: newest first
+        query += ' ORDER BY date DESC, created_at DESC';
+    }
 
     const rows = db.prepare(query).all(...params);
     const expenses = rows.map(formatExpense);

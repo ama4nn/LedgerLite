@@ -140,6 +140,34 @@ html, body, #root {
   color: var(--muted);
 }
 
+.filters {
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filter-group label {
+  white-space: nowrap;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filters select {
+  min-width: 140px;
+  width: auto;
+}
+
 .form-row input, .form-row select, .filters select {
   background: transparent;
   border: none;

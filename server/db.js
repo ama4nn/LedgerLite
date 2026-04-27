@@ -24,4 +24,6 @@ db.exec(`
   );
 `);
 
+console.log('✔ SQLite Database initialized');
+
 module.exports = db;

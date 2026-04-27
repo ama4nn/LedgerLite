@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { createExpense } from '../api';
 
 const PRESET_CATEGORIES = [
@@ -24,6 +25,8 @@ export default function ExpenseForm({ onCreated }) {
   const [errors, setErrors] = useState([]);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   // Idempotency key rotates ONLY on success
   const idempotencyKey = useRef(crypto.randomUUID());
@@ -34,6 +37,23 @@ export default function ExpenseForm({ onCreated }) {
     // Clear feedback when user starts typing again
     setErrors([]);
     setSuccess(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showCategories) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev < PRESET_CATEGORIES.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev > 0 ? prev - 1 : PRESET_CATEGORIES.length - 1));
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      setFormData((prev) => ({ ...prev, category: PRESET_CATEGORIES[activeIndex] }));
+      setShowCategories(false);
+      setActiveIndex(-1);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -77,18 +97,17 @@ export default function ExpenseForm({ onCreated }) {
 
   return (
     <form className="expense-form" onSubmit={handleSubmit}>
-      {success && <p className="success-msg">Expense created successfully!</p>}
       
       {errors.length > 0 && (
         <ul className="error-list">
           {errors.map((error, idx) => (
-            <li key={idx}>{error}</li>
+            <li key={idx}><AlertCircle size={14} /> {error}</li>
           ))}
         </ul>
       )}
 
       <div className="form-row">
-        <label htmlFor="amount">Amount (₹)</label>
+        <label htmlFor="amount">amount (₹)</label>
         <input
           id="amount"
           name="amount"
@@ -101,26 +120,51 @@ export default function ExpenseForm({ onCreated }) {
         />
       </div>
 
-      <div className="form-row">
-        <label htmlFor="category">Category</label>
+      <div className="form-row" style={{ position: 'relative' }}>
+        <label htmlFor="category">category</label>
         <input
           id="category"
           name="category"
           type="text"
-          list="category-suggestions"
           required
+          readOnly
+          placeholder="Select category"
           value={formData.category}
-          onChange={handleChange}
+          onFocus={() => {
+            setShowCategories(true);
+            setActiveIndex(-1);
+          }}
+          onBlur={() => {
+            setTimeout(() => {
+              setShowCategories(false);
+              setActiveIndex(-1);
+            }, 200);
+          }}
+          onKeyDown={handleKeyDown}
+          autoComplete="off"
+          style={{ cursor: 'pointer' }}
         />
-        <datalist id="category-suggestions">
-          {PRESET_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat} />
-          ))}
-        </datalist>
+        {showCategories && (
+          <ul className="category-dropdown">
+            {PRESET_CATEGORIES.map((cat, idx) => (
+              <li
+                key={cat}
+                className={idx === activeIndex ? 'active' : ''}
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, category: cat }));
+                  setShowCategories(false);
+                  setErrors([]);
+                }}
+              >
+                {cat}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="form-row">
-        <label htmlFor="description">Description</label>
+        <label htmlFor="description">description</label>
         <input
           id="description"
           name="description"
@@ -132,20 +176,23 @@ export default function ExpenseForm({ onCreated }) {
       </div>
 
       <div className="form-row">
-        <label htmlFor="date">Date</label>
+        <label htmlFor="date">date</label>
         <input
           id="date"
           name="date"
           type="date"
           required
+          max={getToday()}
           value={formData.date}
           onChange={handleChange}
         />
       </div>
 
       <button type="submit" className="submit-btn" disabled={isSubmitting}>
-        {isSubmitting ? 'Adding...' : 'Add Expense'}
+        {isSubmitting ? 'recording...' : <><Plus size={16} /> add entry</>}
       </button>
+
+      {success && <p className="success-msg"><CheckCircle size={14} /> Entry recorded</p>}
     </form>
   );
 }
